@@ -1,7 +1,7 @@
 [project]
 name = "json2pystmt"
 dynamic = ["version"]
-description = "Convert JSON to executable Python statements for grep/diff operations"
+description = "Convert JSON to Python assignment statements. Useful for grepping JSON, diffing JSON objects, and debugging."
 authors = [
     { name = "Atsuo Ishimoto", email = "atsuoishimoto@gmail.com" }
 ]

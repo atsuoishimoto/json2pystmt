@@ -86,7 +86,7 @@ Convert a JSON-compatible object to a list of Python assignment statements.
 
 - `jsonobj`: Any JSON-compatible Python object (dict, list, str, int, float, bool, None)
 - `rootname`: Variable name to use as the root (default: `"root"`)
-- Returns: List of assignment statement strings, or the original value if empty
+- Returns: List of assignment statement strings
 
 ## Requirements
 

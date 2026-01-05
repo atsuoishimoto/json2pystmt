@@ -38,12 +38,12 @@ class TestBuildJsonExprLines:
     def test_empty_dict(self):
         data = {}
         result = build_json_expr_lines(data)
-        assert result == "{}"
+        assert result == ["root = {}"]
 
     def test_empty_list(self):
         data = []
         result = build_json_expr_lines(data)
-        assert result == "[]"
+        assert result == ["root = []"]
 
     def test_custom_rootname(self):
         data = {"key": "value"}
