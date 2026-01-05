@@ -27,6 +27,7 @@ path = "src/json2pystmt/__init__.py"
 
 [dependency-groups]
 dev = [
+    "mypy>=1.19.1",
     "pytest>=8.0",
     "ruff>=0.8",
     "tox>=4.0",

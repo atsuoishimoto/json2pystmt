@@ -51,9 +51,17 @@ def json2pystmt(jsonobj: Any, rootname: str = "root") -> list[str]:
 
 
 def main() -> None:
+    from . import __version__
+
     parser = argparse.ArgumentParser(
         prog="json2pystmt",
         description="Convert JSON to executable Python statements",
+    )
+    parser.add_argument(
+        "-v",
+        "--version",
+        action="version",
+        version=f"%(prog)s {__version__}",
     )
     parser.add_argument(
         "file",
