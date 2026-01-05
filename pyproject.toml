@@ -35,11 +35,14 @@ dev = [
 ]
 
 [tool.tox]
-env_list = ["py310", "py311", "py312", "py313", "py314"]
+env_list = ["py310", "py311", "py312", "py313", "py314", "mypy"]
 
 [tool.tox.env_run_base]
 runner = "uv-venv-lock-runner"
 commands = [["pytest", "-v"]]
+
+[tool.tox.env.mypy]
+commands = [["mypy", "src"]]
 
 [tool.ruff]
 line-length = 100

@@ -11,7 +11,7 @@ pip install json2pystmt
 Or with uv:
 
 ```bash
-uv add json2pystmt
+uv tool install json2pystmt
 ```
 
 ## Command Line Usage
