@@ -7,18 +7,6 @@ from typing import Any, Generator
 
 __all__ = ["json2pystmt", "build_json_expr_lines", "main"]
 
-
-class _listref:
-    def __init__(self, n: int) -> None:
-        self.numelems = n
-
-    def __repr__(self) -> str:
-        if self.numelems == 0:
-            return "[]"
-        else:
-            return f"[None] * {self.numelems}"
-
-
 def walk_container(
     parent: tuple[str | int, ...], obj: Any
 ) -> Generator[tuple[tuple[str | int, ...], Any], None, None]:
@@ -28,12 +16,19 @@ def walk_container(
             for k, v in obj.items():
                 yield from walk_container(parent + (k,), v)
         case list():
-            yield parent, _listref(len(obj))
+            n = len(obj)
+            if n:
+                liststr = f"[None] * {n}"
+            else:
+                liststr = "[]"
+
+            yield parent, liststr
             for n, v in enumerate(obj):
                 yield from walk_container(parent + (n,), v)
+        case str():
+            yield parent, repr(obj)
         case _:
             yield parent, obj
-
 
 def build_json_expr_lines(jsonobj: Any, rootname: str = "root") -> list[str]:
     if not jsonobj:
@@ -42,7 +37,7 @@ def build_json_expr_lines(jsonobj: Any, rootname: str = "root") -> list[str]:
     lines: list[str] = []
     for path, value in walk_container((), jsonobj):
         pathstr = "".join(f"[{repr(p)}]" for p in path)
-        lines.append(f"{rootname}{pathstr} = {value!r}")
+        lines.append(f"{rootname}{pathstr} = {value}")
     return lines
 
 
