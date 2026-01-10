@@ -1,5 +1,6 @@
 import pytest
-from json2pystmt.json2pystmt import build_json_expr_lines, json2pystmt, ellipsis
+
+from json2pystmt.json2pystmt import build_json_expr_lines, ellipsis, json2pystmt
 
 
 def test_nested_dict_with_list():
@@ -16,6 +17,7 @@ def test_nested_dict_with_list():
         "root['key1'][3]['x']['y'] = 'z'",
     ]
 
+
 def test_simple_dict():
     data = {"a": 1, "b": 2}
     result = build_json_expr_lines(data)
@@ -24,6 +26,7 @@ def test_simple_dict():
         "root['a'] = 1",
         "root['b'] = 2",
     ]
+
 
 def test_simple_list():
     data = [1, 2, 3]
@@ -35,15 +38,18 @@ def test_simple_list():
         "root[2] = 3",
     ]
 
+
 def test_empty_dict():
     data = {}
     result = build_json_expr_lines(data)
     assert result == ["root = {}"]
 
+
 def test_empty_list():
     data = []
     result = build_json_expr_lines(data)
     assert result == ["root = []"]
+
 
 def test_custom_rootname():
     data = {"key": "value"}
@@ -53,15 +59,18 @@ def test_custom_rootname():
         "data['key'] = 'value'",
     ]
 
+
 def test_string_value():
     data = "hello"
     result = build_json_expr_lines(data)
     assert result == ["root = 'hello'"]
 
+
 def test_number_value():
     data = 42
     result = build_json_expr_lines(data)
     assert result == ["root = 42"]
+
 
 def test_nested_empty_structures():
     data = {"a": [], "b": {}}
@@ -77,9 +86,11 @@ def test_alias_function():
     data = {"key": "value"}
     assert json2pystmt(data) == build_json_expr_lines(data)
 
+
 def test_alias_with_rootname():
     data = {"key": "value"}
     assert json2pystmt(data, "obj") == build_json_expr_lines(data, "obj")
+
 
 s = "0123456789"
 testdata = [
@@ -95,6 +106,8 @@ testdata = [
     (s, 8, "0123456789"),
     (s, 9, "0123456789"),
 ]
+
+
 @pytest.mark.parametrize("s, n, result", testdata)
 def test_ellipsis(s, n, result):
     ret = ellipsis(s, n)

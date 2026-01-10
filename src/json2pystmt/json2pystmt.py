@@ -3,71 +3,101 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from typing import Any, Generator
+from typing import Any, Generator, TypeAlias
 
 __all__ = ["json2pystmt", "build_json_expr_lines", "main"]
 
-def ellipsis(s, n):
+
+def ellipsis(s: str, n: int) -> str:
+    """Truncate string s to length n with ellipsis in the middle."""
     slen = len(s)
-    if slen <= n+3: # ...
+    if slen <= n + 3:  # ...
         return s
 
     if n == 0:
         return "..."
 
     if n == 1:
-        return s[0]+"..."
+        return s[0] + "..."
 
     retlen = min(slen, n)
     nright = retlen // 2
     nleft = retlen - nright
-    return s[:nleft]+"..."+s[nright*-1:]
+    return s[:nleft] + "..." + s[nright * -1 :]
+
+
+class _Statement:
+    def __init__(self, stmt: str) -> None:
+        self.stmt = stmt
+
+    def __repr__(self) -> str:
+        return repr(self.stmt)
+
+    def __str__(self) -> str:
+        return self.stmt
+
+
+def _to_str(v: Any, n: int) -> str:
+    s = repr(v)
+    match v:
+        case str():
+            s = repr(v)
+            if n != -1:
+                s = ellipsis(s, n + 2)  # account for quotes
+        case int():
+            return str(v)
+        case _Statement():
+            return str(v)
+        case _:
+            s = repr(v)
+            if n != -1:
+                s = ellipsis(s, n)
+    return s
+
+
+JsonValue: TypeAlias = dict[str, Any] | list[Any] | str | int
+JsonStmt: TypeAlias = tuple[tuple[str | int, ...], Any]
 
 
 def walk_container(
-    parent: tuple[str | int, ...], obj: Any, max_value: int=-1
-) -> Generator[tuple[tuple[str | int, ...], Any], None, None]:
+    parent: tuple[str | int, ...], obj: JsonValue
+) -> Generator[JsonStmt, None, None]:
     match obj:
         case dict():
             yield parent, {}
             for k, v in obj.items():
-                yield from walk_container(parent + (k,), v, max_value)
+                yield from walk_container(parent + (k,), v)
         case list():
             n = len(obj)
             if n:
-                liststr = f"[None] * {n}"
+                liststr = _Statement(f"[None] * {n}")
             else:
-                liststr = "[]"
+                liststr = _Statement("[]")
 
             yield parent, liststr
             for n, v in enumerate(obj):
-                yield from walk_container(parent + (n,), v, max_value)
-        case str():
-            s = repr(obj)
-            if max_value != -1:
-                s = ellipsis(s, max_value+2)
-            yield parent, s
+                yield from walk_container(parent + (n,), v)
         case _:
-            s = repr(obj)
-            if max_value != -1:
-                s = ellipsis(s, max_value)
-            yield parent, s
+            yield parent, obj
 
-def build_json_expr_lines(jsonobj: Any, rootname: str = "root", max_key=-1, max_value=-1) -> list[str]:
+
+def build_json_expr_lines(
+    jsonobj: Any, rootname: str = "root", max_key: int = -1, max_value: int = -1
+) -> list[str]:
     if not jsonobj:
         return [f"{rootname} = {jsonobj!r}"]
 
     lines: list[str] = []
-    for path, value in walk_container((), jsonobj, max_value):
-        path = [repr(p) for p in path]
-        if max_key != -1:
-            path = [ellipsis(p, max_key) for p in path]
-        pathstr = "".join(f"[{p}]" for p in path)
-        lines.append(f"{rootname}{pathstr} = {value}")
+    for path, value in walk_container((), jsonobj):
+        spath = tuple(_to_str(p, max_key) for p in path)
+        pathstr = "".join(f"[{p}]" for p in spath)
+        lines.append(f"{rootname}{pathstr} = {_to_str(value, max_value)}")
     return lines
 
 
-def json2pystmt(jsonobj: Any, rootname: str = "root", max_key=-1, max_value=-1) -> list[str]:
+def json2pystmt(
+    jsonobj: Any, rootname: str = "root", max_key: int = -1, max_value: int = -1
+) -> list[str]:
     return build_json_expr_lines(jsonobj, rootname, max_key, max_value)
 
 
@@ -91,7 +121,7 @@ def main() -> None:
         type=int,
         default=-1,
         dest="max_key",
-        help="Maximum key length(>=2)"
+        help="Maximum key length(>=2)",
     )
     parser.add_argument(
         "-m",
@@ -100,13 +130,13 @@ def main() -> None:
         type=int,
         default=-1,
         dest="max_value",
-        help="Maximum key length(>=2)"
+        help="Maximum key length(>=2)",
     )
     parser.add_argument(
-        "file",
+        "filename",
         nargs="?",
-        type=argparse.FileType("r"),
-        default=sys.stdin,
+        type=str,
+        default="-",
         help="JSON file to process (default: stdin)",
     )
     parser.add_argument(
@@ -126,8 +156,13 @@ def main() -> None:
     if args.max_value < -1:
         sys.exit("Invalid max_value_length")
 
+    if args.filename == "-":
+        f = sys.stdin
+    else:
+        f = open(args.filename)
+
     try:
-        data = json.load(args.file)
+        data = json.load(f)
     except json.JSONDecodeError as e:
         print(f"Error: Invalid JSON - {e}", file=sys.stderr)
         sys.exit(1)
