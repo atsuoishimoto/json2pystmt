@@ -16,38 +16,6 @@ uv tool install json2pystmt
 
 ## Command Line Usage
 
-```bash
-# From file
-json2pystmt data.json
-
-# From stdin
-cat data.json | json2pystmt
-
-# Custom root variable name
-json2pystmt -r myvar data.json
-```
-
-### Example
-
-Input JSON:
-```json
-{"key1": [1, 2, {"x": {"y": "z"}}]}
-```
-
-Output:
-```python
-root = {}
-root['key1'] = [None] * 3
-root['key1'][0] = 1
-root['key1'][1] = 2
-root['key1'][2] = {}
-root['key1'][2]['x'] = {}
-root['key1'][2]['x']['y'] = 'z'
-```
-
-### Use Cases
-
-**Grep for values in JSON:**
 ```
 ❯ json2pystmt --help
 usage: json2pystmt [-h] [-v] [-k MAX_KEY] [-m MAX_VALUE] [-r ROOT] [filename]
@@ -65,6 +33,39 @@ options:
   -m, --max-value-length MAX_VALUE
                         Maximum key length (default: -1)
   -r, --root ROOT       Root variable name (default: root)
+```
+
+### Example
+
+Input JSON:
+```json
+{"key1": [1, 2, {"x": {"y": "z"}}]}
+```
+
+```
+# From file
+json2pystmt data.json
+
+# From stdin
+cat data.json | json2pystmt
+```
+
+Output:
+```python
+root = {}
+root['key1'] = [None] * 3
+root['key1'][0] = 1
+root['key1'][1] = 2
+root['key1'][2] = {}
+root['key1'][2]['x'] = {}
+root['key1'][2]['x']['y'] = 'z'
+```
+
+### Use Cases
+
+**Grep for values in JSON:**
+```bash
+json2pystmt data.json | grep "error"
 ```
 
 **Diff two JSON files:**
