@@ -48,8 +48,23 @@ root['key1'][2]['x']['y'] = 'z'
 ### Use Cases
 
 **Grep for values in JSON:**
-```bash
-json2pystmt data.json | grep "error"
+```
+❯ json2pystmt --help
+usage: json2pystmt [-h] [-v] [-k MAX_KEY] [-m MAX_VALUE] [-r ROOT] [filename]
+
+Convert JSON to executable Python statements
+
+positional arguments:
+  filename              JSON file to process (default: stdin)
+
+options:
+  -h, --help            show this help message and exit
+  -v, --version         show program's version number and exit
+  -k, --max-key-length MAX_KEY
+                        Maximum key length (default: -1)
+  -m, --max-value-length MAX_VALUE
+                        Maximum key length (default: -1)
+  -r, --root ROOT       Root variable name (default: root)
 ```
 
 **Diff two JSON files:**
@@ -80,12 +95,15 @@ root['users'][1]['name'] = 'Bob'
 
 ### API
 
-#### `json2pystmt(jsonobj, rootname="root")`
+#### `def json2pystmt(jsonobj: Any, rootname: str = "root", max_key: int = -1, max_value: int = -1)`
+
 
 Convert a JSON-compatible object to a list of Python assignment statements.
 
 - `jsonobj`: Any JSON-compatible Python object (dict, list, str, int, float, bool, None)
 - `rootname`: Variable name to use as the root (default: `"root"`)
+- `max_key`:  Maximum key length
+- `max_value`:  Maximum value length
 - Returns: List of assignment statement strings
 
 ## Requirements

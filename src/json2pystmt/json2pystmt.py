@@ -121,7 +121,7 @@ def main() -> None:
         type=int,
         default=-1,
         dest="max_key",
-        help="Maximum key length(>=2)",
+        help="Maximum key length  (default: -1)",
     )
     parser.add_argument(
         "-m",
@@ -130,7 +130,7 @@ def main() -> None:
         type=int,
         default=-1,
         dest="max_value",
-        help="Maximum key length(>=2)",
+        help="Maximum key length  (default: -1)",
     )
     parser.add_argument(
         "filename",
